@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -301,6 +302,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	tracer.Start(
+		tracer.WithService(DatadogServiceName),
+		tracer.WithEnv(DatadogEnv),
+		//tracer.WithRuntimeMetrics(),
+	)
+	defer tracer.Stop()
 
 	host := os.Getenv("MYSQL_HOST")
 	if host == "" {

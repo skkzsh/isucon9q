@@ -1,0 +1,4 @@
+*.jpg
+initial-data/result/initial.sql
+initial-data/result/items_json.txt
+webapp/sql/initial.sql 

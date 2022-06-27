@@ -15,6 +15,8 @@ import (
 	"strconv"
 	"time"
 
+	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
@@ -57,6 +59,9 @@ const (
 	TransactionsPerPage = 10
 
 	BcryptCost = 10
+
+	DatadogServiceName        = "isucon9qualify"
+	DatadogEnv                = "myenv"
 )
 
 var (
@@ -279,6 +284,24 @@ func init() {
 }
 
 func main() {
+	err := profiler.Start(
+		profiler.WithService(DatadogServiceName),
+		profiler.WithEnv(DatadogEnv),
+		profiler.WithProfileTypes(
+			profiler.CPUProfile,
+			profiler.HeapProfile,
+			// The profiles below are disabled by default to keep overhead
+			// low, but can be enabled as needed.
+
+			// profiler.BlockProfile,
+			// profiler.MutexProfile,
+			// profiler.GoroutineProfile,
+		),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	host := os.Getenv("MYSQL_HOST")
 	if host == "" {
 		host = "127.0.0.1"
@@ -287,7 +310,7 @@ func main() {
 	if port == "" {
 		port = "3306"
 	}
-	_, err := strconv.Atoi(port)
+	_, err = strconv.Atoi(port)
 	if err != nil {
 		log.Fatalf("failed to read DB port number from an environment variable MYSQL_PORT.\nError: %s", err.Error())
 	}
